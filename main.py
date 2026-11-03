@@ -1,7 +1,29 @@
 import discord
 import os
 import google.generativeai as genai
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# --- Render কে খুশি রাখার জন্য ডামি ওয়েব সার্ভার ---
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"Boss AI is alive and running!")
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 10000))
+    server_address = ('0.0.0.0', port)
+    httpd = HTTPServer(server_address, RequestHandler)
+    httpd.serve_forever()
+
+def keep_alive():
+    server_thread = threading.Thread(target=run_dummy_server)
+    server_thread.daemon = True
+    server_thread.start()
+
+# --- Discord Bot ও Gemini Setup ---
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -51,5 +73,8 @@ async def on_message(message):
             
     except Exception as e:
         await message.channel.send(f"Sorry Boss, ekta technical error hoyeche: {str(e)}")
+
+# Render এর পোর্ট চালু করা
+keep_alive()
 
 client.run(DISCORD_TOKEN)
