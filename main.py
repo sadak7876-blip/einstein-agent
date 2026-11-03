@@ -28,7 +28,9 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 genai.configure(api_key=GEMINI_API_KEY)
-
+for m in genai.list_models():
+    if 'generateContent' in m.supported_generation_methods:
+        print(f"✅ SUPPORTED MODEL: {m.name}")
 system_instruction = """
 You are 'Boss AI' - the ultimate, 100% reliable personal Chief of Staff and Master Agent for your boss, Sadak Hossain.
 Your mission is to execute tasks with absolute precision and zero errors.
